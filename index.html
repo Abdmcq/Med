@@ -45,6 +45,21 @@
         input[type="range"]::-webkit-slider-thumb { background: #14B8A6; }
         input[type="range"]::-moz-range-thumb { background: #14B8A6; }
         .accent-teal-500 { accent-color: #14B8A6; }
+        
+        /* استايل شاشة القلب */
+        .ecg-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 80px;
+            border: 2px solid #1f2937;
+        }
+        #ecgCanvas {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 5px #14B8A6);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -123,16 +138,13 @@
         let results = {};
         const appDiv = document.getElementById('app');
         let audioPlayer = new Audio();
+        audioPlayer.crossOrigin = "anonymous"; // ضروري لتحليل الصوت
         audioPlayer.preload = "auto";
         let currentTrackIndex = 0;
         let isPlayerInitialized = false;
-        
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+
+        // متغيرات للـ Visualizer
+        let audioCtx, analyser, source, dataArray, canvas, canvasCtx;
 
         function initializeAudioPlayer() {
             if (isPlayerInitialized) return;
@@ -148,9 +160,71 @@
                     progressBar.value = percentage;
                 }
             });
-            audioPlayer.addEventListener('play', updatePlayerUI);
+            audioPlayer.addEventListener('play', () => {
+                updatePlayerUI();
+                setupVisualizer();
+            });
             audioPlayer.addEventListener('pause', updatePlayerUI);
             isPlayerInitialized = true;
+        }
+
+        function setupVisualizer() {
+            if (audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                source = audioCtx.createMediaElementSource(audioPlayer);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                canvas = document.getElementById('ecgCanvas');
+                if(canvas) {
+                    canvasCtx = canvas.getContext('2d');
+                    drawECG();
+                }
+            } catch(e) { console.log("Visualizer blocked by browser policy until interaction"); }
+        }
+
+        function drawECG() {
+            if(!canvasCtx) return;
+            requestAnimationFrame(drawECG);
+            analyser.getByteFrequencyData(dataArray);
+
+            canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // تأثير مسح تدريجي
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // رسم الشبكة الطبية الخلفية
+            canvasCtx.strokeStyle = '#064e3b';
+            canvasCtx.lineWidth = 0.5;
+            for(let i=0; i<canvas.width; i+=20) {
+                canvasCtx.beginPath(); canvasCtx.moveTo(i,0); canvasCtx.lineTo(i,canvas.height); canvasCtx.stroke();
+            }
+            for(let i=0; i<canvas.height; i+=20) {
+                canvasCtx.beginPath(); canvasCtx.moveTo(0,i); canvasCtx.lineTo(canvas.width,i); canvasCtx.stroke();
+            }
+
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = '#14B8A6';
+            canvasCtx.beginPath();
+
+            let sliceWidth = canvas.width * 1.0 / dataArray.length;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                let v = dataArray[i] / 128.0;
+                let y = (v * canvas.height / 2);
+
+                if (i === 0) canvasCtx.moveTo(x, canvas.height/2 - y/2);
+                else canvasCtx.lineTo(x, canvas.height/2 - y/2);
+
+                x += sliceWidth;
+            }
+
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
         }
 
         function updatePlayerUI() {
@@ -167,6 +241,7 @@
         }
         
         function togglePlayPause() {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             if (audioPlayer.paused) { audioPlayer.play().catch(e => console.error(e)); } 
             else { audioPlayer.pause(); }
             updatePlayerUI();
@@ -255,7 +330,6 @@
 
         function renderQuizScreen() {
             initializeAudioPlayer();
-            audioPlayer.play().catch(e => console.log("Autoplay active after interaction"));
             
             shuffleArray(quizData); 
             let quizHTML = quizData.map((item, index) => `
@@ -285,10 +359,17 @@
                 </header>
                 <main class="container mx-auto max-w-4xl p-4 md:p-8 flex-grow">
                     <div class="bg-white shadow-xl rounded-xl p-4 mb-8 border-t-4 border-teal-500">
-                        <!-- تم تعديل العبارة وتصغير الخط هنا -->
                         <h2 class="text-center text-lg font-bold text-gray-800 mb-2">هواجيس خفيفة - غير مزاجك/ج اثناء التشخيص</h2>
+                        
+                        <!-- مشغل الموسيقى المطور -->
                         <div class="flex flex-col space-y-3">
-                            <p id="trackTitle" class="text-lg font-semibold text-teal-600 text-center truncate">...</p>
+                            <div class="ecg-container">
+                                <canvas id="ecgCanvas"></canvas>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                     <p id="trackTitle" class="text-sm font-bold text-white bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm truncate max-w-[80%]">...</p>
+                                </div>
+                            </div>
+                            
                             <div class="flex items-center space-x-2 w-full" dir="ltr">
                                 <span id="currentTime" class="text-sm text-gray-600 min-w-[30px] text-right">0:00</span>
                                 <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1" onchange="seek(this.value)" class="flex-grow h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-teal-500">
@@ -303,12 +384,22 @@
                             </div>
                         </div>
                     </div>
+                    
                     <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">اختبار تشخيص الصور</h2>
                     <div class="grid gap-8 md:grid-cols-2">${quizHTML}</div>
                     <div id="quizSummary" class="mt-10 p-5 bg-yellow-100 border-l-4 border-yellow-500 rounded-lg text-center font-medium text-gray-700 hidden"></div>
                 </main>
             `;
             updatePlayerUI();
+            // تشغيل المشغل تلقائياً بعد أول تفاعل
+            audioPlayer.play().catch(() => console.log("Waiting for user interaction to play"));
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
         }
 
         function checkDiagnosis(id, correctDiagnosis) {
@@ -361,3 +452,4 @@
     </script>
 </body>
 </html>
+
