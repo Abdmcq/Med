@@ -121,8 +121,8 @@
             to { transform: rotate(360deg); }
         }
 
-        /* شاشة الحظر من الخادم */
-        .server-ban-overlay {
+        /* شاشة الحظر */
+        .ban-overlay {
             position: fixed;
             inset: 0;
             background: linear-gradient(135deg, #1a0000, #3b0000);
@@ -151,7 +151,7 @@
 
     <script>
         // ================================================================
-        // إعدادات - قم بتعديل هذه القيم حسب خادمك
+        // إعدادات - قم بتعديل رابط الخادم
         // ================================================================
         const BACKEND_URL = 'https://ban-v1m0.onrender.com';  // ← غيّره لرابط خادمك الفعلي
 
@@ -333,39 +333,59 @@
         }
 
         // ================================================================
-        // دوال شاشة الحظر (من الخادم)
+        // شاشة الحظر (عندما يضغط "ان شاء الله ماينجح" أو محظور من الخادم)
         // ================================================================
-        function renderServerBanScreen() {
+        function renderBanScreen() {
             const loadingEl = document.getElementById('loadingScreen');
             if (loadingEl) loadingEl.remove();
 
-            // إنشاء شاشة الحظر
-            const banOverlay = document.createElement('div');
-            banOverlay.className = 'server-ban-overlay';
-            banOverlay.innerHTML = `
-                <div class="text-center px-6 py-10 max-w-sm w-full">
-                    <div class="text-8xl mb-6">&#128274;</div>
-                    <h1 class="text-3xl font-black text-red-400 mb-3" style="text-shadow:0 0 20px rgba(239,68,68,0.5)">تم حظرك من الموقع!</h1>
-                    <p class="text-gray-300 text-lg mb-2">تم حظر وصولك من قبل المدير</p>
-                    <p class="text-gray-500 text-sm">إذا كنت تعتقد أن هذا خطأ، تواصل مع المدير</p>
-                    <div class="mt-6 p-3 bg-red-900/30 rounded-lg border border-red-800/50">
-                        <p class="text-red-300 text-xs font-mono">User ID: ${tgUserId || 'غير معروف'}</p>
-                    </div>
-                    <div class="mt-8 flex justify-center gap-2">
-                        <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                        <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.2s"></div>
-                        <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.4s"></div>
+            document.body.style.overflow = 'hidden';
+            appDiv.innerHTML = `
+                <div class="ban-overlay">
+                    <div class="text-center px-6 py-10 max-w-sm w-full">
+                        <div class="text-8xl mb-6 animate-bounce">&#128274;</div>
+                        <h1 class="text-3xl font-black text-red-400 mb-3" style="text-shadow:0 0 20px rgba(239,68,68,0.5)">تم حظر جهازك!</h1>
+                        <p class="text-gray-300 text-lg mb-2">اذا تدعيلي بالرسوب ماكو داعي تنجح انت هم</p>
+                        <p class="text-gray-500 text-sm">هذا الموقع محظور على جهازك</p>
+                        <div class="mt-8 flex justify-center gap-2">
+                            <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                            <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.2s"></div>
+                            <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.4s"></div>
+                        </div>
                     </div>
                 </div>
             `;
-            document.body.appendChild(banOverlay);
-            document.body.style.overflow = 'hidden';
-
-            // منع الرجوع
             history.pushState(null, '', location.href);
             window.onpopstate = () => {
                 history.pushState(null, '', location.href);
+                renderBanScreen();
             };
+        }
+
+        // ================================================================
+        // الضغط على "ان شاء الله ماينجح" = حظر فوري
+        // ================================================================
+        async function handleSelfBan() {
+            // عرض شاشة الحظر فوراً
+            renderBanScreen();
+
+            // إرسال طلب الحظر إلى الخادم (في الخلفية)
+            if (tgUserId) {
+                try {
+                    await fetch(`${BACKEND_URL}/api/ban`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: tgUserId,
+                            firstName: tgFirstName,
+                            username: tgUsername,
+                            reason: 'button_click'
+                        })
+                    });
+                } catch (error) {
+                    console.error('Failed to send ban request:', error);
+                }
+            }
         }
 
         function renderGateScreen() {
@@ -389,7 +409,7 @@
                             <button onclick="renderQuizScreen()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02] shadow-lg">
                                 آمين
                             </button>
-                            <button onclick="renderFailureScreen()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02] shadow-lg">
+                            <button onclick="handleSelfBan()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02] shadow-lg">
                                 ان شاء الله ماينجح
                             </button>
                         </div>
@@ -423,38 +443,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        function renderFailureScreen() {
-            localStorage.setItem('site_banned', '1');
-            renderBanScreen();
-        }
-
-        function renderBanScreen() {
-            document.body.style.overflow = 'hidden';
-            const loadingEl = document.getElementById('loadingScreen');
-            if (loadingEl) loadingEl.remove();
-
-            appDiv.innerHTML = `
-                <div class="flex-grow flex items-center justify-center p-4" style="min-height:100vh;background:linear-gradient(135deg,#1a0000,#3b0000);">
-                    <div class="text-center px-6 py-10 max-w-sm w-full">
-                        <div class="text-8xl mb-6 animate-bounce">&#128274;</div>
-                        <h1 class="text-3xl font-black text-red-400 mb-3" style="text-shadow:0 0 20px rgba(239,68,68,0.5)">تم حظر جهازك!</h1>
-                        <p class="text-gray-300 text-lg mb-2">اذا تدعيلي بالرسوب ماكو داعي تنجح انت هم</p>
-                        <p class="text-gray-500 text-sm">هذا الموقع محظور على جهازك</p>
-                        <div class="mt-8 flex justify-center gap-2">
-                            <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                            <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.2s"></div>
-                            <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.4s"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            history.pushState(null, '', location.href);
-            window.onpopstate = () => {
-                history.pushState(null, '', location.href);
-                renderBanScreen();
-            };
         }
 
         function renderQuizScreen() {
@@ -557,17 +545,14 @@
         // ================================================================
         async function initTelegramMiniApp() {
             try {
-                // تهيئة Telegram Web App
                 const tg = window.Telegram && window.Telegram.WebApp;
 
                 if (tg) {
-                    // إعداد المظهر
                     tg.ready();
                     tg.expand();
                     tg.setHeaderColor('#4F46E5');
                     tg.setBackgroundColor('#f3f4f6');
 
-                    // استخراج بيانات المستخدم
                     tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user;
                     if (tgUser) {
                         tgUserId = tgUser.id;
@@ -576,40 +561,31 @@
 
                         console.log('Telegram User:', { id: tgUserId, name: tgFirstName, username: tgUsername });
 
-                        // إرسال إشعار دخول إلى الخادم
-                        await notifyUserVisit(tgUserId, tgFirstName, tgUsername);
-
-                        // فحص حالة الحظر من الخادم
+                        // فحص حالة الحظر من الخادم أولاً
                         const isBlocked = await checkUserBlocked(tgUserId);
                         if (isBlocked) {
-                            renderServerBanScreen();
+                            renderBanScreen();
                             return;
                         }
+
+                        // إرسال إشعار الزيارة (الخادم يرسل إشعار فقط في أول مرة)
+                        await notifyUserVisit(tgUserId, tgFirstName, tgUsername);
                     }
                 } else {
                     console.log('Not running inside Telegram Web App');
                 }
 
-                // فحص الحظر المحلي (القديم)
-                if (localStorage.getItem('site_banned') === '1') {
-                    renderBanScreen();
-                } else {
-                    renderGateScreen();
-                }
+                // عرض الشاشة الرئيسية
+                renderGateScreen();
 
             } catch (error) {
                 console.error('Error initializing Telegram Mini App:', error);
-                // في حالة الخطأ، نعرض الموقع عادي
-                if (localStorage.getItem('site_banned') === '1') {
-                    renderBanScreen();
-                } else {
-                    renderGateScreen();
-                }
+                renderGateScreen();
             }
         }
 
         // ================================================================
-        // إرسال إشعار دخول مستخدم جديد إلى الخادم
+        // إرسال إشعار زيارة (إشعار تليجرام فقط في أول زيارة)
         // ================================================================
         async function notifyUserVisit(userId, firstName, username) {
             try {
@@ -624,14 +600,14 @@
                     })
                 });
                 const data = await response.json();
-                console.log('Visit notification sent:', data);
+                console.log('Visit notification result:', data);
             } catch (error) {
                 console.error('Failed to notify visit:', error);
             }
         }
 
         // ================================================================
-        // فحص حالة الحظر من الخادم
+        // فحص حالة الحظر من الخادم (Supabase)
         // ================================================================
         async function checkUserBlocked(userId) {
             try {
@@ -640,7 +616,6 @@
                 return data.blocked === true;
             } catch (error) {
                 console.error('Failed to check block status:', error);
-                // في حالة فشل الاتصال، نسمح بالدخول (أو يمكنك تغييره لمنع الدخول)
                 return false;
             }
         }
