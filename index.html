@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-236N37LHFR"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -13,21 +12,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تشخيص صور الباطنية - MCQ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- ============================================ -->
-    <!-- Telegram Web App SDK -->
-    <!-- ============================================ -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Inter:wght@900&display=swap');
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f3f4f6;
-        }
-        .logo-font {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; }
+        .logo-font { font-family: 'Inter', sans-serif; }
         .typing-container {
             --chars: 17;
             width: calc(var(--chars) * 1ch);
@@ -35,8 +25,7 @@
             white-space: nowrap;
             display: inline-block;
             border-right: .15em solid #4F46E5;
-            animation: type-delete-cycle 8s steps(var(--chars)) infinite,
-                       blink 0.5s step-end infinite;
+            animation: type-delete-cycle 8s steps(var(--chars)) infinite, blink 0.5s step-end infinite;
         }
         @keyframes type-delete-cycle {
             0% { width: 0; }
@@ -56,11 +45,7 @@
             height: 80px;
             border: 2px solid #1f2937;
         }
-        #ecgCanvas {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 5px #14B8A6);
-        }
+        #ecgCanvas { width: 100%; height: 100%; filter: drop-shadow(0 0 5px #14B8A6); }
         .option-btn {
             transition: all 0.2s;
             text-align: right;
@@ -71,71 +56,72 @@
             font-size: 0.9rem;
             font-weight: 600;
         }
-        .option-btn:hover:not(:disabled) {
-            background-color: #f3f4f6;
-            border-color: #4F46E5;
-        }
-        .option-btn.correct {
-            background-color: #d1fae5;
-            border-color: #10b981;
-            color: #065f46;
-        }
-        .option-btn.wrong {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-            color: #991b1b;
-        }
-        .tg-pulse {
-            animation: pulse-blue 2s infinite;
-        }
+        .option-btn:hover:not(:disabled) { background-color: #f3f4f6; border-color: #4F46E5; }
+        .option-btn.correct { background-color: #d1fae5; border-color: #10b981; color: #065f46; }
+        .option-btn.wrong { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        .tg-pulse { animation: pulse-blue 2s infinite; }
         @keyframes pulse-blue {
             0% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(34, 158, 217, 0); }
             100% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0); }
         }
-
-        /* شاشة التحميل */
         .loading-screen {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: linear-gradient(135deg, #4F46E5, #7C3AED);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.5s ease;
         }
-        .loading-screen.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .loading-screen.fade-out { opacity: 0; pointer-events: none; }
         .spinner {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             border: 4px solid rgba(255,255,255,0.3);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* شاشة الحظر */
         .ban-overlay {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: linear-gradient(135deg, #1a0000, #3b0000);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             z-index: 9998;
+        }
+
+        /* شاشة الصيانة */
+        .maintenance-overlay {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0a0a2e, #1a1a4e);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9997;
+        }
+
+        /* شاشة "تليجرام فقط" */
+        .tg-only-overlay {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0d1117, #161b22);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9996;
+        }
+
+        .floating-dots span {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: float 1.4s ease-in-out infinite;
+        }
+        .floating-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .floating-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-8px); opacity: 1; }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- شاشة التحميل تظهر أولاً -->
     <div id="loadingScreen" class="loading-screen">
         <div class="text-center text-white">
             <div class="spinner mx-auto mb-4"></div>
@@ -151,9 +137,9 @@
 
     <script>
         // ================================================================
-        // إعدادات - قم بتعديل رابط الخادم
+        // إعدادات
         // ================================================================
-        const BACKEND_URL = 'https://ban-v1m0.onrender.com';  // ← غيّره لرابط خادمك الفعلي
+        const BACKEND_URL = 'https://ban-v1m0.onrender.com';
 
         // ================================================================
         // متغيرات Telegram Web App
@@ -210,14 +196,10 @@
             let pool = allDiagnoses.filter(d => d !== correct);
             let similar = [];
             if (categoryKey) { similar = pool.filter(d => categories[categoryKey].some(keyword => d.toLowerCase().includes(keyword.toLowerCase()))); }
-            shuffleArray(similar);
-            shuffleArray(pool);
+            shuffleArray(similar); shuffleArray(pool);
             let chosen = [];
             chosen.push(...similar.slice(0, 3));
-            if (chosen.length < 3) {
-                let remaining = pool.filter(p => !chosen.includes(p));
-                chosen.push(...remaining.slice(0, 3 - chosen.length));
-            }
+            if (chosen.length < 3) { let remaining = pool.filter(p => !chosen.includes(p)); chosen.push(...remaining.slice(0, 3 - chosen.length)); }
             chosen.push(correct);
             shuffleArray(chosen);
             return chosen;
@@ -243,8 +225,7 @@
                 const progressBar = document.getElementById('progressBar');
                 if (currentTimeDisplay) currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
                 if (progressBar && !isNaN(audioPlayer.duration) && audioPlayer.duration > 0) {
-                    const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-                    progressBar.value = percentage;
+                    progressBar.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
                 }
             });
             audioPlayer.addEventListener('play', () => { updatePlayerUI(); setupVisualizer(); });
@@ -264,29 +245,32 @@
                 const bufferLength = analyser.frequencyBinCount;
                 dataArray = new Uint8Array(bufferLength);
                 canvas = document.getElementById('ecgCanvas');
-                if(canvas) { canvasCtx = canvas.getContext('2d'); drawECG(); }
+                if (canvas) { canvasCtx = canvas.getContext('2d'); drawECG(); }
             } catch(e) { console.log("Visualizer blocked"); }
         }
 
         function drawECG() {
-            if(!canvasCtx) return;
+            if (!canvasCtx) return;
             requestAnimationFrame(drawECG);
             analyser.getByteFrequencyData(dataArray);
             canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
             canvasCtx.strokeStyle = '#064e3b';
             canvasCtx.lineWidth = 0.5;
-            for(let i=0; i<canvas.width; i+=20) { canvasCtx.beginPath(); canvasCtx.moveTo(i,0); canvasCtx.lineTo(i,canvas.height); canvasCtx.stroke(); }
-            for(let i=0; i<canvas.height; i+=20) { canvasCtx.beginPath(); canvasCtx.moveTo(0,i); canvasCtx.lineTo(canvas.width,i); canvasCtx.stroke(); }
+            for (let i = 0; i < canvas.width; i += 20) { canvasCtx.beginPath(); canvasCtx.moveTo(i, 0); canvasCtx.lineTo(i, canvas.height); canvasCtx.stroke(); }
+            for (let i = 0; i < canvas.height; i += 20) { canvasCtx.beginPath(); canvasCtx.moveTo(0, i); canvasCtx.lineTo(canvas.width, i); canvasCtx.stroke(); }
             canvasCtx.lineWidth = 2; canvasCtx.strokeStyle = '#14B8A6'; canvasCtx.beginPath();
             let sliceWidth = canvas.width * 1.0 / dataArray.length;
             let x = 0;
             for (let i = 0; i < dataArray.length; i++) {
-                let v = dataArray[i] / 128.0; let y = (v * canvas.height / 2);
-                if (i === 0) canvasCtx.moveTo(x, canvas.height/2 - y/2); else canvasCtx.lineTo(x, canvas.height/2 - y/2);
+                let v = dataArray[i] / 128.0;
+                let y = (v * canvas.height / 2);
+                if (i === 0) canvasCtx.moveTo(x, canvas.height / 2 - y / 2);
+                else canvasCtx.lineTo(x, canvas.height / 2 - y / 2);
                 x += sliceWidth;
             }
-            canvasCtx.lineTo(canvas.width, canvas.height / 2); canvasCtx.stroke();
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
         }
 
         function updatePlayerUI() {
@@ -304,8 +288,8 @@
 
         function togglePlayPause() {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            if (audioPlayer.paused) { audioPlayer.play().catch(e => console.error(e)); }
-            else { audioPlayer.pause(); }
+            if (audioPlayer.paused) audioPlayer.play().catch(e => console.error(e));
+            else audioPlayer.pause();
             updatePlayerUI();
         }
 
@@ -328,26 +312,103 @@
         function seek(value) { if (!isNaN(audioPlayer.duration)) audioPlayer.currentTime = (value / 100) * audioPlayer.duration; }
         function skipTime(time) { audioPlayer.currentTime += time; }
         function formatTime(seconds) {
-            const min = Math.floor(seconds / 60); const sec = Math.floor(seconds % 60);
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // ================================================================
-        // شاشة الحظر (عندما يضغط "ان شاء الله ماينجح" أو محظور من الخادم)
-        // ================================================================
-        function renderBanScreen() {
+        function hideLoading() {
             const loadingEl = document.getElementById('loadingScreen');
-            if (loadingEl) loadingEl.remove();
+            if (loadingEl) {
+                loadingEl.classList.add('fade-out');
+                setTimeout(() => loadingEl.remove(), 500);
+            }
+        }
 
+        function lockPage() {
             document.body.style.overflow = 'hidden';
+            history.pushState(null, '', location.href);
+            window.onpopstate = () => {
+                history.pushState(null, '', location.href);
+            };
+        }
+
+        // ================================================================
+        // شاشة: تليجرام فقط
+        // ================================================================
+        function renderTelegramOnlyScreen() {
+            hideLoading();
+            lockPage();
+            appDiv.innerHTML = `
+                <div class="tg-only-overlay">
+                    <div class="text-center px-8 py-10 max-w-sm w-full">
+                        <div class="mb-6">
+                            <div class="w-20 h-20 mx-auto bg-gradient-to-br from-sky-500 to-blue-600 rounded-full flex items-center justify-center shadow-2xl" style="box-shadow: 0 0 40px rgba(14, 165, 233, 0.4)">
+                                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.36-.49.99-.75 3.88-1.68 6.47-2.79 7.76-3.32 3.69-1.5 4.45-1.76 4.96-1.77.11 0 .36.03.52.17.13.12.17.28.18.41-.01.07-.01.14-.02.21z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h1 class="text-2xl font-black text-white mb-3">تليجرام فقط</h1>
+                        <p class="text-gray-400 text-base mb-2">هذا الموقع متاح حصراً من داخل تطبيق تليجرام</p>
+                        <p class="text-gray-600 text-sm mb-8">افتح الرابط عبر البوت على تليجرام للوصول</p>
+                        <div class="floating-dots flex justify-center">
+                            <span class="bg-sky-500"></span>
+                            <span class="bg-blue-500"></span>
+                            <span class="bg-indigo-500"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // شاشة: الصيانة
+        // ================================================================
+        function renderMaintenanceScreen(firstName) {
+            hideLoading();
+            lockPage();
+            appDiv.innerHTML = `
+                <div class="maintenance-overlay">
+                    <div class="text-center px-8 py-10 max-w-sm w-full">
+                        <div class="text-7xl mb-6" style="filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.6))">⚙️</div>
+                        <h1 class="text-2xl font-black text-indigo-300 mb-4">الموقع قيد الصيانة</h1>
+                        <div class="bg-indigo-900/40 border border-indigo-700/50 rounded-xl p-5 mb-6">
+                            <p class="text-gray-200 text-base leading-relaxed">
+                                عزيزي <span class="text-indigo-300 font-bold">${firstName || 'الزائر'}</span> الموقع قيد الصيانة حاليًا،
+                                سيتم فتحه فور إكمال السيد <span class="text-white font-bold">عبدالرحمن حسن</span> إجراءات الصيانة.
+                            </p>
+                        </div>
+                        <div class="flex justify-center items-center gap-2">
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full animate-ping"></div>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full animate-ping" style="animation-delay:0.3s"></div>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full animate-ping" style="animation-delay:0.6s"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // شاشة: الحظر (مع دعم الرسالة المخصصة)
+        // ================================================================
+        function renderBanScreen(customMessage) {
+            hideLoading();
+            lockPage();
+
+            const defaultMsg = 'اذا تدعيلي بالرسوب ماكو داعي تنجح انت هم';
+            const banMsg = customMessage || defaultMsg;
+
             appDiv.innerHTML = `
                 <div class="ban-overlay">
                     <div class="text-center px-6 py-10 max-w-sm w-full">
                         <div class="text-8xl mb-6 animate-bounce">&#128274;</div>
                         <h1 class="text-3xl font-black text-red-400 mb-3" style="text-shadow:0 0 20px rgba(239,68,68,0.5)">تم حظر جهازك!</h1>
-                        <p class="text-gray-300 text-lg mb-2">اذا تدعيلي بالرسوب ماكو داعي تنجح انت هم</p>
-                        <p class="text-gray-500 text-sm">هذا الموقع محظور على جهازك</p>
-                        <div class="mt-8 flex justify-center gap-2">
+                        <div class="bg-red-950/60 border border-red-800/50 rounded-xl px-5 py-4 mb-4">
+                            <p class="text-gray-200 text-base leading-relaxed">${banMsg}</p>
+                        </div>
+                        <p class="text-gray-600 text-xs">هذا الموقع محظور على حسابك</p>
+                        <div class="mt-6 flex justify-center gap-2">
                             <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
                             <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.2s"></div>
                             <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay:0.4s"></div>
@@ -355,21 +416,15 @@
                     </div>
                 </div>
             `;
-            history.pushState(null, '', location.href);
-            window.onpopstate = () => {
-                history.pushState(null, '', location.href);
-                renderBanScreen();
-            };
         }
 
         // ================================================================
-        // الضغط على "ان شاء الله ماينجح" = حظر فوري
+        // حظر بعد الضغط على الزر
         // ================================================================
         async function handleSelfBan() {
-            // عرض شاشة الحظر فوراً
-            renderBanScreen();
+            // عرض شاشة الحظر فوراً بالرسالة الافتراضية
+            renderBanScreen(null);
 
-            // إرسال طلب الحظر إلى الخادم (في الخلفية)
             if (tgUserId) {
                 try {
                     await fetch(`${BACKEND_URL}/api/ban`, {
@@ -388,19 +443,16 @@
             }
         }
 
+        // ================================================================
+        // الشاشة الرئيسية
+        // ================================================================
         function renderGateScreen() {
-            const loadingEl = document.getElementById('loadingScreen');
-            if (loadingEl) {
-                loadingEl.classList.add('fade-out');
-                setTimeout(() => loadingEl.remove(), 500);
-            }
-
-            const typingText = "Abdulrahman Hasan";
+            hideLoading();
             appDiv.innerHTML = `
                 <div class="flex-grow flex items-center justify-center p-4">
                     <div class="bg-white shadow-2xl rounded-xl p-8 max-w-sm md:max-w-md w-full text-center border-t-4 border-indigo-600 relative overflow-hidden">
                         <div class="mb-8 h-6 flex justify-center">
-                            <h2 class="text-xl text-indigo-700 font-extrabold logo-font typing-container">${typingText}</h2>
+                            <h2 class="text-xl text-indigo-700 font-extrabold logo-font typing-container">Abdulrahman Hasan</h2>
                         </div>
                         <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-6 leading-relaxed">
                             يارب ينجح عبدالرحمن حسن بالفاينل
@@ -414,7 +466,6 @@
                             </button>
                         </div>
 
-                        <!-- معلومات المستخدم من تليجرام -->
                         ${tgUserId ? `
                         <div class="pt-4 border-t border-gray-100 mb-4">
                             <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
@@ -425,7 +476,6 @@
                         </div>
                         ` : ''}
 
-                        <!-- معرف التليجرام بتصميم جميل -->
                         <div class="pt-6 border-t border-gray-100">
                             <a href="https://t.me/ll7ddd" target="_blank"
                                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-100 rounded-full hover:from-sky-100 hover:to-indigo-100 transition-all duration-300 group tg-pulse">
@@ -482,7 +532,7 @@
                         <div class="flex flex-col space-y-3">
                             <div class="ecg-container"><canvas id="ecgCanvas"></canvas>
                                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                     <p id="trackTitle" class="text-xs font-bold text-white bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm truncate max-w-[80%]">...</p>
+                                    <p id="trackTitle" class="text-xs font-bold text-white bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm truncate max-w-[80%]">...</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2 w-full" dir="ltr">
@@ -528,7 +578,8 @@
             document.getElementById('scoreCounter').innerText = `${score} / ${quizData.length}`;
             const totalAnswered = Object.keys(results).length;
             if (totalAnswered === quizData.length) {
-                const summaryDiv = document.getElementById('quizSummary'); summaryDiv.classList.remove('hidden');
+                const summaryDiv = document.getElementById('quizSummary');
+                summaryDiv.classList.remove('hidden');
                 summaryDiv.innerHTML = `<p class="text-lg font-bold">خلصت الأسئلة!</p><p class="mt-1">درجتك النهائية: ${score} من ${quizData.length}</p>`;
             }
         }
@@ -541,83 +592,92 @@
         }
 
         // ================================================================
-        // منطق Telegram Mini App - بداية التشغيل
+        // منطق التهيئة الرئيسي
         // ================================================================
         async function initTelegramMiniApp() {
             try {
                 const tg = window.Telegram && window.Telegram.WebApp;
 
-                if (tg) {
-                    tg.ready();
-                    tg.expand();
-                    tg.setHeaderColor('#4F46E5');
-                    tg.setBackgroundColor('#f3f4f6');
+                // ── ميزة 1: تليجرام فقط ──
+                // نفحص إذا كانت initData موجودة (تعني الدخول من داخل تليجرام)
+                const isInsideTelegram = tg && tg.initData && tg.initData.length > 0;
 
-                    tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user;
-                    if (tgUser) {
-                        tgUserId = tgUser.id;
-                        tgFirstName = tgUser.first_name || '';
-                        tgUsername = tgUser.username || '';
+                if (!isInsideTelegram) {
+                    renderTelegramOnlyScreen();
+                    return;
+                }
 
-                        console.log('Telegram User:', { id: tgUserId, name: tgFirstName, username: tgUsername });
+                // إعداد تليجرام
+                tg.ready();
+                tg.expand();
+                tg.setHeaderColor('#4F46E5');
+                tg.setBackgroundColor('#f3f4f6');
 
-                        // فحص حالة الحظر من الخادم أولاً
-                        const isBlocked = await checkUserBlocked(tgUserId);
-                        if (isBlocked) {
-                            renderBanScreen();
-                            return;
-                        }
+                tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user;
+                if (tgUser) {
+                    tgUserId = tgUser.id;
+                    tgFirstName = tgUser.first_name || '';
+                    tgUsername = tgUser.username || '';
+                }
 
-                        // إرسال إشعار الزيارة (الخادم يرسل إشعار فقط في أول مرة)
-                        await notifyUserVisit(tgUserId, tgFirstName, tgUsername);
+                // ── فحص الحظر والصيانة من الخادم ──
+                if (tgUserId) {
+                    const checkData = await checkUserStatus(tgUserId);
+
+                    // فحص الحظر أولاً
+                    if (checkData.blocked) {
+                        renderBanScreen(checkData.customMessage);
+                        return;
                     }
-                } else {
-                    console.log('Not running inside Telegram Web App');
+
+                    // ── ميزة 2: وضع الصيانة ──
+                    if (checkData.maintenance) {
+                        renderMaintenanceScreen(tgFirstName);
+                        return;
+                    }
+
+                    // تسجيل الزيارة (في الخلفية، لا نحتاج انتظارها)
+                    notifyUserVisit(tgUserId, tgFirstName, tgUsername)
+                        .catch(err => console.error('Visit notify error:', err));
                 }
 
                 // عرض الشاشة الرئيسية
                 renderGateScreen();
 
             } catch (error) {
-                console.error('Error initializing Telegram Mini App:', error);
+                console.error('Init error:', error);
+                // في حالة خطأ في الشبكة - نعرض الشاشة الرئيسية (لا نعاقب المستخدم)
                 renderGateScreen();
             }
         }
 
         // ================================================================
-        // إرسال إشعار زيارة (إشعار تليجرام فقط في أول زيارة)
+        // فحص حالة المستخدم (حظر + صيانة + رسالة مخصصة)
         // ================================================================
-        async function notifyUserVisit(userId, firstName, username) {
+        async function checkUserStatus(userId) {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/visit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: userId,
-                        firstName: firstName,
-                        username: username,
-                        timestamp: new Date().toISOString()
-                    })
-                });
+                const response = await fetch(`${BACKEND_URL}/api/check/${userId}`);
                 const data = await response.json();
-                console.log('Visit notification result:', data);
+                return {
+                    blocked: data.blocked === true,
+                    customMessage: data.customMessage || null,
+                    maintenance: data.maintenance === true
+                };
             } catch (error) {
-                console.error('Failed to notify visit:', error);
+                console.error('Failed to check user status:', error);
+                return { blocked: false, customMessage: null, maintenance: false };
             }
         }
 
         // ================================================================
-        // فحص حالة الحظر من الخادم (Supabase)
+        // تسجيل زيارة
         // ================================================================
-        async function checkUserBlocked(userId) {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/check/${userId}`);
-                const data = await response.json();
-                return data.blocked === true;
-            } catch (error) {
-                console.error('Failed to check block status:', error);
-                return false;
-            }
+        async function notifyUserVisit(userId, firstName, username) {
+            await fetch(`${BACKEND_URL}/api/visit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, firstName, username, timestamp: new Date().toISOString() })
+            });
         }
 
         // ================================================================
